@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/temideewan/go-social/docs" // required to generate the swagger docs
+	"github.com/temideewan/go-social/internal/mailer"
 	"github.com/temideewan/go-social/internal/store"
 )
 
@@ -19,6 +20,7 @@ type application struct {
 	config config
 	store  store.Storage
 	logger *zap.SugaredLogger
+	mailer mailer.Client
 }
 
 type config struct {

@@ -160,7 +160,7 @@ paths:
       - ApiKeyAuth: []
       summary: Registers a user
       tags:
-      - authentication
+      - users
   /feed:
     get:
       consumes:

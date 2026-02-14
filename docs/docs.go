@@ -39,7 +39,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "authentication"
+                    "users"
                 ],
                 "summary": "Registers a user",
                 "parameters": [

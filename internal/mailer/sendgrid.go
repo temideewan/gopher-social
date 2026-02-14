@@ -7,15 +7,15 @@ import (
 
 type SendGridMailer struct {
 	fromEmail string
-	apiKey string
-	client *sendgrid.Client
+	apiKey    string
+	client    *sendgrid.Client
 }
 
 func NewSendGrid(apiKey, fromEmail string) *SendGridMailer {
 	client := sendgrid.NewSendClient(apiKey)
 
-	return &
+	return &SendGridMailer{}
 }
-func (m *SenSendGridMailer) Send(templateFile, username, email string, data any, isSandbox bool) error {
-	from := mail.NewEmail
+func (m *SendGridMailer) Send(templateFile, username, email string, data any, isSandbox bool) error {
+	from := mail.NewEmail(FromName, m.fromEmail)
 }

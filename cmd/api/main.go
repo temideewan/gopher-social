@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/temideewan/go-social/internal/db"
@@ -50,6 +51,11 @@ func main() {
 			sendGrid: sendGridConfig{
 				apiKey: env.GetString("SENDGRID_API_KEY", ""),
 			},
+			mailTrap: mailTrapConfig{
+				apiKey:   env.GetString("MAILTRAP_API_KEY", ""),
+				username: env.GetString("MAILTRAP_USERNAME", ""),
+				password: env.GetString("MAILTRAP_PASSWORD", ""),
+			},
 		},
 	}
 	// logger
@@ -72,7 +78,11 @@ func main() {
 
 	store := store.NewStorage(db)
 
-	mailer := mailer.NewSendGrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
+	// mailer := mailer.NewSendGrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
+	mailer, err := mailer.NewMailTrapClient(cfg.mail.mailTrap.apiKey, cfg.mail.fromEmail, cfg.mail.mailTrap.username, cfg.mail.mailTrap.password)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	app := &application{
 		config: cfg,

@@ -1,75 +1,54 @@
 package mailer
 
 import (
-	"bytes"
-	"fmt"
-	"log"
-	"time"
+	"errors"
 
-	"github.com/wneessen/go-mail"
+	gomail "gopkg.in/mail.v2"
 )
 
-type MailtrapMailer struct {
+type mailtrapClient struct {
 	fromEmail string
 	apiKey    string
-	client    *mail.Client
+	username  string
+	password  string
 }
 
-func New(host string, port int, username, password, sender string) (*MailtrapMailer, error) {
-
-	client, err := mail.NewClient(
-		host,
-		mail.WithSMTPAuth(mail.SMTPAuthLogin),
-		mail.WithPort(port),
-		mail.WithUsername(username),
-		mail.WithPassword(password),
-		mail.WithTimeout(5*time.Second),
-	)
-
-	if err != nil {
-		return nil, err
+func NewMailTrapClient(apiKey, fromEmail, username, password string) (mailtrapClient, error) {
+	if apiKey == "" {
+		return mailtrapClient{}, errors.New("api key is required")
 	}
-
-	mailer := &MailtrapMailer{
-		client:    client,
-		fromEmail: sender,
-	}
-	return mailer, nil
+	return mailtrapClient{
+		fromEmail: fromEmail,
+		apiKey:    apiKey,
+		username:  username,
+		password:  password,
+	}, nil
 }
 
-func (m *MailtrapMailer) Send(templateFile, username, email string, data any, isSandbox bool) error {
-	msg := mail.NewMsg()
-
-	err := msg.To(email)
+func (m mailtrapClient) Send(templateFile, username, email string, data any, isSandbox bool) (int, error) {
+	// template parsing and building
+	subject, body, err := constructTemplate("templates/"+templateFile, data)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
-	err = msg.From(FromName)
-	if err != nil {
-		return nil
+	message := gomail.NewMessage()
+	message.SetHeader("From", m.fromEmail)
+	message.SetHeader("To", email)
+	message.SetHeader("Subject", subject)
+
+	message.AddAlternative("text/html", body)
+
+	dialer := gomail.NewDialer("sandbox.smtp.mailtrap.io", 587, m.username, m.password)
+
+	if err := dialer.DialAndSend(message); err != nil {
+		return -1, err
 	}
-	// template parsing
-	subject := new(bytes.Buffer)
-	plainBody := new(bytes.Buffer)
-	htmlBody := new(bytes.Buffer)
-
-	msg.Subject(subject.String())
-	msg.SetBodyString(mail.TypeTextPlain, plainBody.String())
-	msg.AddAlternativeString(mail.TypeTextHTML, htmlBody.String())
-
-	for i := 0; i < maxRetries; i++ {
-		err = m.client.DialAndSend(msg)
+	return sendMail(func() (int, error) {
+		err := dialer.DialAndSend(message)
 		if err != nil {
-			log.Printf("Failed to send email to %v, attempt %d of %d", email, i+1, maxRetries)
-			log.Printf("Error :%v", err.Error())
-
-			// exponential backoff
-			time.Sleep(time.Second * time.Duration(i+1))
-			continue
+			return -1, err
 		}
-		log.Printf("Email send successfully to %v", email)
-		return nil
-	}
-	return fmt.Errorf("Email sending failed")
+		return 200, nil
+	})
 }

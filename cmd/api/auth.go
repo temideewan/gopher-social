@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -105,6 +106,10 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.internalServerError(w, r, err)
 		return
 	}
+
+	app.logger.Infow("welcome email sent", "email", user.Email, "status code", response)
+
+	log.Printf("User with email: %s \t registered with status code: %d", user.Email, response)
 
 	if err := app.jsonResponse(w, http.StatusCreated, userWithToken); err != nil {
 		app.internalServerError(w, r, err)

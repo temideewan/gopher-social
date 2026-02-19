@@ -1,13 +1,16 @@
+import { useNavigate, useParams } from "react-router-dom";
 import { API_URL } from "./App";
 
 const ConfirmationPage = () => {
-  const token = ""
+  const {token = ''} = useParams();
+  const redirect = useNavigate()
   const handleConfirm = async () => {
     const response = await fetch(`${API_URL}/users/activate/${token}`, {
       method: 'PUT',
     });
     if (response.ok) {
       // redirect to the "/" page
+      redirect('/')
     } else {
       // handle error
       alert('Failed to confirm. Please try again.');

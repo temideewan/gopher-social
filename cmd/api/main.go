@@ -57,6 +57,12 @@ func main() {
 				password: env.GetString("MAILTRAP_PASSWORD", ""),
 			},
 		},
+		auth: authConfig{
+			basic: basicConfig{
+				user: env.GetString("AUTH_BASIC_USER", "admin"),
+				pass: env.GetString("AUTH_BASIC_pass", "admin"),
+			},
+		},
 	}
 	// logger
 	logger := zap.Must(zap.NewProduction()).Sugar()

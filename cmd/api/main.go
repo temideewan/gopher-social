@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/temideewan/go-social/internal/auth"
 	"github.com/temideewan/go-social/internal/db"
 	"github.com/temideewan/go-social/internal/env"
 	"github.com/temideewan/go-social/internal/mailer"
@@ -62,6 +63,11 @@ func main() {
 				user: env.GetString("AUTH_BASIC_USER", "admin"),
 				pass: env.GetString("AUTH_BASIC_pass", "admin"),
 			},
+			token: tokenConfig{
+				secret: env.GetString("AUTH_TOKEN_SECRET", "example"),
+				exp:    time.Hour * 24 * 3, // 3 days
+				iss:    "gophersocial",
+			},
 		},
 	}
 	// logger
@@ -85,16 +91,18 @@ func main() {
 	store := store.NewStorage(db)
 
 	// mailer := mailer.NewSendGrid(cfg.mail.sendGrid.apiKey, cfg.mail.fromEmail)
+	jwtAuthenticator := auth.NewJWTAuthenticator(cfg.auth.token.secret, cfg.auth.token.iss, cfg.auth.token.iss)
 	mailer, err := mailer.NewMailTrapClient(cfg.mail.mailTrap.apiKey, cfg.mail.fromEmail, cfg.mail.mailTrap.username, cfg.mail.mailTrap.password)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	app := &application{
-		config: cfg,
-		store:  store,
-		logger: logger,
-		mailer: mailer,
+		config:        cfg,
+		store:         store,
+		logger:        logger,
+		mailer:        mailer,
+		authenticator: jwtAuthenticator,
 	}
 
 	mux := app.mount()

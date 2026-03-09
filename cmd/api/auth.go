@@ -124,7 +124,7 @@ type CreateUserTokenPayload struct {
 	Password string `json:"password" validate:"required,min=3,max=72"`
 }
 
-// RegisterUser godoc
+// CreateUserToken godoc
 //
 //	@Summary		Creates a token
 //	@Description	Creates a token for a user

@@ -22,7 +22,7 @@ import (
 //	@Success		200		{object}	[]store.PostWithMetadata
 //	@Failure		500		{object}	error
 //	@Security		ApiKeyAuth
-//	@Router			/feed [get]
+//	@Router			/users/feed [get]
 func (app *application) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 	// pagination, filters, sort
 	fq := store.PaginatedFeedQuery{

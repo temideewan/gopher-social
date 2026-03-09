@@ -52,19 +52,18 @@ type FollowerUser struct {
 //	@Failure		404	{object}	error	"User not found"
 //	@Failure		500	{object}	error
 //	@Security		ApiKeyAuth
-//	@Router			/users/{id}/follow [put]
+//	@Router			/users/{userID}/follow [put]
 func (app *application) followUserHandler(w http.ResponseWriter, r *http.Request) {
-	followedUser := getUserFromContext(r)
+	followerUser := getUserFromContext(r)
 
-	// TODO: revert to auth userID from ctx
-	var payload FollowerUser
-	if err := readJSON(w, r, &payload); err != nil {
+	followedID, err := strconv.ParseInt(chi.URLParam(r, "userID"), 10, 64)
+	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
 
 	ctx := r.Context()
-	if err := app.store.Followers.Follow(ctx, followedUser.ID, payload.UserID); err != nil {
+	if err := app.store.Followers.Follow(ctx, followerUser.ID, followedID); err != nil {
 		switch err {
 		case store.ErrNotFound:
 			app.notFoundResponse(w, r, err)
@@ -131,16 +130,15 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 //	@Security		ApiKeyAuth
 //	@Router			/users/{id}/unfollow [put]
 func (app *application) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
-	followedUser := getUserFromContext(r)
-	// TODO: revert to auth userID from ctx
-	var payload FollowerUser
-	if err := readJSON(w, r, &payload); err != nil {
+	followerUser := getUserFromContext(r)
+
+	unFollowedID, err := strconv.ParseInt(chi.URLParam(r, "userID"), 10, 64)
+	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
-
 	ctx := r.Context()
-	if err := app.store.Followers.Unfollow(ctx, followedUser.ID, payload.UserID); err != nil {
+	if err := app.store.Followers.Unfollow(ctx, followerUser.ID, unFollowedID); err != nil {
 		switch err {
 		case store.ErrNotFound:
 			app.notFoundResponse(w, r, err)

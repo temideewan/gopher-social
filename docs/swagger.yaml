@@ -1,5 +1,21 @@
 basePath: /v1
 definitions:
+  main.CreatePostPayload:
+    properties:
+      content:
+        maxLength: 1000
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        maxLength: 100
+        type: string
+    required:
+    - content
+    - title
+    type: object
   main.CreateUserTokenPayload:
     properties:
       email:
@@ -40,6 +56,8 @@ definitions:
         type: integer
       is_active:
         type: boolean
+      role:
+        $ref: '#/definitions/store.Role'
       role_id:
         type: integer
       token:
@@ -118,6 +136,17 @@ definitions:
       version:
         type: integer
     type: object
+  store.Role:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      level:
+        type: integer
+      name:
+        type: string
+    type: object
   store.User:
     properties:
       created_at:
@@ -128,6 +157,8 @@ definitions:
         type: integer
       is_active:
         type: boolean
+      role:
+        $ref: '#/definitions/store.Role'
       role_id:
         type: integer
       username:
@@ -234,6 +265,13 @@ paths:
       consumes:
       - application/json
       description: Creates a new post
+      parameters:
+      - description: Post data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreatePostPayload'
       produces:
       - application/json
       responses:
@@ -253,6 +291,37 @@ paths:
       tags:
       - posts
   /posts/{postId}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a post by id
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/store.Post'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Post not found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Deletes a post
+      tags:
+      - posts
     get:
       consumes:
       - application/json
@@ -284,7 +353,7 @@ paths:
       summary: Get a post
       tags:
       - posts
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates an existing post

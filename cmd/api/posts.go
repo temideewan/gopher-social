@@ -32,9 +32,10 @@ type UpdatePostPayload struct {
 //	@Tags			posts
 //	@Accept			json
 //	@Produce		json
-//	@Success		201	{object}	store.Post
-//	@Failure		400	{object}	error
-//	@Failure		500	{object}	error
+//	@Param			payload	body		CreatePostPayload	true	"Post data"
+//	@Success		201		{object}	store.Post
+//	@Failure		400		{object}	error
+//	@Failure		500		{object}	error
 //	@Security		ApiKeyAuth
 //	@Router			/posts [post]
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -100,6 +101,20 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// CreatePost godoc
+//
+//	@Summary		Deletes a post
+//	@Description	Deletes a post by id
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			postId	path		int	true	"Post ID"
+//	@Success		201		{object}	store.Post
+//	@Failure		400		{object}	error
+//	@Failure		404		{object}	error	"Post not found"
+//	@Failure		500		{object}	error
+//	@Security		ApiKeyAuth
+//	@Router			/posts/{postId} [delete]
 func (app *application) deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	post := getPostFromCtx(r)
 	err := app.store.Posts.DeleteById(r.Context(), post.ID)

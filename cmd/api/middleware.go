@@ -63,6 +63,7 @@ func (app *application) AuthTokenMiddleware(next http.Handler) http.Handler {
 			app.unauthorizedErrorResponse(w, r, fmt.Errorf("authorization header is malformed"))
 			return
 		}
+		fmt.Println("Token:", parts[1])
 		token := parts[1]
 		jwtToken, err := app.authenticator.ValidateToken(token)
 		if err != nil {

@@ -146,7 +146,7 @@ func (app *application) getAllPostHandler(w http.ResponseWriter, r *http.Request
 //	@Failure		404		{object}	error	"Post not found"
 //	@Failure		500		{object}	error
 //	@Security		ApiKeyAuth
-//	@Router			/posts/{postId} [put]
+//	@Router			/posts/{postId} [patch]
 func (app *application) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	post := getPostFromCtx(r)
 	var payload UpdatePostPayload

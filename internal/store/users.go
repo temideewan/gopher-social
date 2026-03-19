@@ -53,14 +53,21 @@ func (s *UserStore) Create(ctx context.Context, tx *sql.Tx, user *User) error {
 	defer cancel()
 	query := `
 		INSERT INTO users (username, password, email, role_id)
-		VALUES($1,$2,$3,$4)
+		VALUES($1,$2,$3,(
+		SELECT id from roles WHERE name = $4))
 		RETURNING id, created_at
 		`
+
+	role := user.Role.Name
+
+	if role == "" {
+		role = "user"
+	}
 	err := tx.QueryRowContext(ctx, query,
 		user.Username,
 		user.Password.hash,
 		user.Email,
-		user.RoleId,
+		role,
 	).Scan(
 		&user.ID,
 		&user.CreatedAt,

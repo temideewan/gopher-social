@@ -91,23 +91,15 @@ func (app *application) checkPostOwnership(requiredRole string, next http.Handle
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := getUserFromContext(r)
 		post := getPostFromCtx(r)
-		// if it is the user's post
 		if post.UserID == user.ID {
 			next.ServeHTTP(w, r)
 			return
 		}
-		// role precedence check
 		allowed, err := app.checkRolePrecedence(r.Context(), user, requiredRole)
 
 		if err != nil {
-			switch err {
-			case store.ErrNotFound:
-				app.badRequestResponse(w, r, err)
-				return
-			default:
-				app.internalServerError(w, r, err)
-				return
-			}
+			app.internalServerError(w, r, err)
+			return
 		}
 
 		if !allowed {
